@@ -1,10 +1,11 @@
+import java.io.FileNotFoundException;
 import java.util.*;
 
 import javax.naming.directory.SearchResult;
 
 public class Hello {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         Scanner myObj = new Scanner(System.in);
         Data usersInfo = new Data();
         char choice = ' ';
@@ -53,17 +54,7 @@ public class Hello {
             do {
                 System.out.println("What is your username");
                 search = myObj.next();
-                searchResults = FileManipulation.GetAllData(search);
-
-                if (searchResults.size() == 0) {
-                    System.out.println("No data found");
-                } else {
-                    System.out.println("Business Name       SpecialWord     PassWord");
-                    for (int i = 0; i < searchResults.size(); i++) {
-                        System.out.println(searchResults.get(i).m_Business + "  " + searchResults.get(i).m_SpecialWord
-                                + "  " + searchResults.get(i).m_Password);
-                    }
-                }
+                FileManipulation.SearchFromFile2(search);
 
                 System.out.println("Do you want to search again");
                 choice = myObj.next().charAt(0);
@@ -72,35 +63,6 @@ public class Hello {
 
         }
 
-    }
-
-    List<Data> SearchUsingKeyWord() {
-
-        System.out.println(
-                "Dyu want so search for password using business - 'b', password - p, special word - s or username - u");
-        searchOption = myObj.next().charAt(0);
-        searchOption = Character.toLowerCase(searchOption);
-
-        System.out.println("Enter your search");
-        search = myObj.next();
-        switch (searchOption) {
-            case 'b':
-                searchResults = FileManipulation.SearchBusinessNameFromFile(search);
-                break;
-            case 'p':
-                searchResults = FileManipulation.SearchPassFromFile(search);
-                break;
-            case 's':
-                searchResults = FileManipulation.SearchWordFromFile(search);
-                break;
-            case 'u':
-                searchResults = FileManipulation.SearchPassFromFileUsingUserName(search);
-                break;
-            default:
-                System.out.println("Invalid Input");
-                break;
-        }
-        return searchResults;
     }
 
 }
