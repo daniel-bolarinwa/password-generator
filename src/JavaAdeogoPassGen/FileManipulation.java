@@ -10,11 +10,12 @@ import java.nio.file.Paths;
 public class FileManipulation {
 
     public static void WriteToFileTxt(Data infoToSave) {
-        File PassWord = new File("filename.txt");
+        String newFileName = infoToSave.m_Username + ".txt";
+        File passwordFile = new File(newFileName);
         try {
-            // File PassWord = new File("filename.txt");
-            if (PassWord.createNewFile()) {
-                System.out.println("File created: " + PassWord.getName());
+            // File passwordFile = new File("filename.txt");
+            if (passwordFile.createNewFile()) {
+                System.out.println("File created: " + passwordFile.getName());
             } else {
                 System.out.println("File already exists.");
             }
@@ -23,12 +24,18 @@ public class FileManipulation {
             e.printStackTrace();
         }
 
-        try (FileWriter f = new FileWriter(PassWord, true);
+        try (FileWriter f = new FileWriter(passwordFile, true);
                 BufferedWriter b = new BufferedWriter(f);
                 PrintWriter p = new PrintWriter(b);) {
+            // this methos is if you want the username to be in the file and they get their
+            // detail based on if there is a username that matches the search
+            // p.println(Data.RemoveSpace(infoToSave.m_Business) + " " +
+            // Data.RemoveSpace(infoToSave.m_SpecialWord) + " " + infoToSave.m_passwordFile
+            // + " " + infoToSave.m_Username);
 
+            // adds the data to the file
             p.println(Data.RemoveSpace(infoToSave.m_Business) + " " + Data.RemoveSpace(infoToSave.m_SpecialWord) + " "
-                    + infoToSave.m_Password + " " + infoToSave.m_Username);
+                    + infoToSave.m_Password);
             p.flush();
             System.out.println("Data added");
         } catch (IOException i) {
@@ -37,42 +44,66 @@ public class FileManipulation {
 
     }
 
-    public static List<Data> SearchPassFromFile(String Pass) {
+    private static List<Data> SearchFromFile(String Username) {
+        List<Data> allData = new ArrayList<Data>();// gets all the data from the file, each line of info in the file is
+                                                   // an entry in this list
+        List<String> passwordFile = new ArrayList<String>();
 
-        List<Data> allData = new ArrayList<Data>();
-        List<String> Password = new ArrayList<String>();
-        List<Data> possibleData = new ArrayList<Data>();
+        String newFileName = Username + ".txt";
 
-        String search = Data.ConvertToLower(Pass);
+        // converts all to lowercase to allow for human error when searching
+        String search = Data.ConvertToLower(Username);
 
         try {
-            List<String> allLines = Files.readAllLines(Paths.get("filename.txt"));
+            List<String> allLines = Files.readAllLines(Paths.get(newFileName));
+            // for each line in the file make it a string which we assign to the variable
+            // linr
             for (String line : allLines) {
                 Data dataFromFile = new Data();
+                // this saves the index of every position with a space in that line
                 List<Integer> spacePos = new ArrayList<Integer>();
                 for (int i = 0; i < line.length(); i++) {
                     if (line.charAt(i) == ' ') {
                         spacePos.add(i);
                     }
                 }
-                String business = line.substring(0, spacePos.get(0));
-                String word = line.substring((spacePos.get(0)) + 1, spacePos.get(1));
-                String pass = line.substring(spacePos.get(1) + 1);
-                dataFromFile.m_Business = business;
-                dataFromFile.m_SpecialWord = word;
-                dataFromFile.m_Password = pass;
+                // this divides the line into words based on the position of the spaces and
+                // places those words into the right string in the data
+                dataFromFile.m_Business = line.substring(0, spacePos.get(0));
+                dataFromFile.m_SpecialWord = line.substring((spacePos.get(0)) + 1, spacePos.get(1));
+                dataFromFile.m_Password = line.substring(spacePos.get(1) + 1);
                 allData.add(dataFromFile);
             }
         } catch (IOException e) {
+            System.out.println("An error occurred.");
             e.printStackTrace();
         }
 
+        return allData;
+
+    }
+
+    public static List<Data> SearchPassFromFile(String Pass, String Username) {
+
+        List<Data> possibleData = new ArrayList<Data>();
+
+        List<Data> allData = SearchFromFile(Username);
+
+        List<String> passwordFile = new ArrayList<String>();
+
+        // now extract only the passwords for the all data list because that is what we
+        // are looking for and then we make is lower case a well so its easier to search
+
         for (int i = 0; i < allData.size(); i++) {
-            Password.add(allData.get(i).m_Password.toLowerCase());
+            passwordFile.add(allData.get(i).m_passwordFile.toLowerCase());
         }
 
-        for (int i = 0; i < Password.size(); i++) {
-            if (Password.get(i).contains(search)) {
+        // this check every word in the password list and if that word contains the word
+        // you searched then it adds the proper password and the Data associated with it
+        // to a new list
+        // and when it iterates through the list it returns the list with that data
+        for (int i = 0; i < passwordFile.size(); i++) {
+            if (passwordFile.get(i).contains(search)) {
                 possibleData.add(allData.get(i));
             }
         }
@@ -80,35 +111,12 @@ public class FileManipulation {
 
     }
 
-    public static List<Data> SearchBusinessNameFromFile(String Business) {
-        List<Data> allData = new ArrayList<Data>();
-        List<String> allBusiness = new ArrayList<String>();
+    public static List<Data> SearchBusinessNameFromFile(String Business, String Username) {
         List<Data> possibleData = new ArrayList<Data>();
 
-        String search = Data.ConvertToLower(Business);
+        List<Data> allData = SearchFromFile(Username);
 
-        try {
-            List<String> allLines = Files.readAllLines(Paths.get("filename.txt"));
-            for (String line : allLines) {
-                Data dataFromFile = new Data();
-                List<Integer> spacePos = new ArrayList<Integer>();
-                for (int i = 0; i < line.length(); i++) {
-                    if (line.charAt(i) == ' ') {
-                        spacePos.add(i);
-                    }
-                }
-
-                String business = line.substring(0, spacePos.get(0));
-                String word = line.substring((spacePos.get(0)) + 1, spacePos.get(1));
-                String pass = line.substring(spacePos.get(1) + 1);
-                dataFromFile.m_Business = business;
-                dataFromFile.m_SpecialWord = word;
-                dataFromFile.m_Password = pass;
-                allData.add(dataFromFile);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<String> allBusiness = new ArrayList<String>();
 
         for (int i = 0; i < allData.size(); i++) {
             allBusiness.add(allData.get(i).m_Business.toLowerCase());
@@ -116,42 +124,19 @@ public class FileManipulation {
 
         for (int i = 0; i < allBusiness.size(); i++) {
             if (allBusiness.get(i).indexOf(search) != -1) {
-                System.out.println("it contains " + allBusiness.get(i));
                 possibleData.add(allData.get(i));
             }
-            System.out.println("it contains " + allBusiness.get(i) + " " + search);
         }
         return possibleData;
     }
 
     public static List<Data> SearchWordFromFile(String word) {
-        List<Data> allData = new ArrayList<Data>();
-        List<String> allSpecialWord = new ArrayList<String>();
+
         List<Data> possibleData = new ArrayList<Data>();
 
-        String search = Data.ConvertToLower(word);
+        List<Data> allData = SearchFromFile(Username);
 
-        try {
-            List<String> allLines = Files.readAllLines(Paths.get("filename.txt"));
-            for (String line : allLines) {
-                Data dataFromFile = new Data();
-                List<Integer> spacePos = new ArrayList<Integer>();
-                for (int i = 0; i < line.length(); i++) {
-                    if (line.charAt(i) == ' ') {
-                        spacePos.add(i);
-                    }
-                }
-                String business = line.substring(0, spacePos.get(0));
-                String SpecialWord = line.substring((spacePos.get(0)) + 1, spacePos.get(1));
-                String pass = line.substring(spacePos.get(1) + 1);
-                dataFromFile.m_Business = business;
-                dataFromFile.m_SpecialWord = SpecialWord;
-                dataFromFile.m_Password = pass;
-                allData.add(dataFromFile);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<String> allSpecialWord = new ArrayList<String>();
 
         for (int i = 0; i < allData.size(); i++) {
             allSpecialWord.add(allData.get(i).m_SpecialWord.toLowerCase());
@@ -165,36 +150,17 @@ public class FileManipulation {
         return possibleData;
     }
 
+    public static List<Data> GetAllData(String userName) {
+        return SearchFromFile(userName);
+    }
+
     public static List<Data> SearchPassFromFileUsingUserName(String userName) {
 
-        List<Data> allData = new ArrayList<Data>();
-        List<String> allBusiness = new ArrayList<String>();
         List<Data> possibleData = new ArrayList<Data>();
 
-        try {
-            List<String> allLines = Files.readAllLines(Paths.get("filename.txt"));
-            for (String line : allLines) {
-                Data dataFromFile = new Data();
-                List<Integer> spacePos = new ArrayList<Integer>();
-                for (int i = 0; i < line.length(); i++) {
-                    if (line.charAt(i) == ' ') {
-                        spacePos.add(i);
-                    }
-                }
+        List<Data> allData = SearchFromFile(Username);
 
-                String business = line.substring(0, spacePos.get(0));
-                String word = line.substring((spacePos.get(0)) + 1, spacePos.get(1));
-                String pass = line.substring(spacePos.get(1) + 1, spacePos.get(2));
-                String user = line.substring(spacePos.get(2) + 1);
-                dataFromFile.m_Business = business;
-                dataFromFile.m_SpecialWord = word;
-                dataFromFile.m_Password = pass;
-                dataFromFile.m_Username = user;
-                allData.add(dataFromFile);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<String> allBusiness = new ArrayList<String>();
 
         for (int i = 0; i < allData.size(); i++) {
             allBusiness.add(allData.get(i).m_Username);
@@ -202,10 +168,9 @@ public class FileManipulation {
 
         for (int i = 0; i < allBusiness.size(); i++) {
             if (allBusiness.get(i).equals(userName)) {
-                System.out.println("it contains " + allBusiness.get(i));
                 possibleData.add(allData.get(i));
             }
-            // System.out.println("it contains " + allBusiness.get(i) + " " + search);
+
         }
         return possibleData;
 

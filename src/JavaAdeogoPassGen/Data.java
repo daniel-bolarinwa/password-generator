@@ -13,15 +13,29 @@ public class Data {
     public String CreatePass(String Bus, String pass, int symbolAmount, boolean convertToSymbol) {
         char[] symbolsToAdd = new char[] { '!', '"', '$', '%', '^', '&', '*', '(', ')', '_', '-', '+', '/', '@', '#',
                 '?' };
+
         Map<Character, Character> symbolsToChange = new HashMap<Character, Character>();
+
+        // what this does is create a hash table of letters and the numbers that look
+        // like the letters
         symbolsToChange = CreateSymbolChange(symbolsToChange);
+
         Random rand = new Random(); // instance of random class
         int upperbound = 1998;
         int int_random = rand.nextInt(upperbound - 999);
+
+        // bus = business and what this does is it makes the word you entered title case
+        // (each word capitalized), then it removes all spaces from the word
         Bus = SentenceCase(Bus).replace(" ", "");
         pass = SentenceCase(pass).replace(" ", "");
+
+        // the is the password that will be be returned but it is conjoined because you
+        // have to have numbers and symbols to it
+        // this concantinates the pass with the business name then adds the number to it
+        // as a string
         String conjoinedString = Bus.concat(pass) + String.valueOf(int_random);
 
+        // this converts the letters to numbers
         if (convertToSymbol) {
             char[] conjoinedChars = conjoinedString.toCharArray();
             for (int i = 0; i < conjoinedString.length(); i++) {
@@ -34,9 +48,8 @@ public class Data {
             }
             conjoinedString = String.valueOf(conjoinedChars);
         }
-        Random randSymbol = new Random(); // instance of random class
+
         int max = symbolsToAdd.length;
-        int randSymbolToAdd;
         switch (symbolAmount) {
             case 1:
                 conjoinedString = symbolsToAdd[rand.nextInt(max)] + conjoinedString;
