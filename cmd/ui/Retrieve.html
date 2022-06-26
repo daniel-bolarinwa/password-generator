@@ -1,14 +1,44 @@
 <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrive Page</title>
+</head>
 
 <body>
     <center>
+        
         <h1>Retrieve Password</h1>
         <label for="Username">Username:</label>
         <input type="text" id="Username"><br><br>
 
-        <button class="submit" type="submit">Retrieve password</button>
+        <button class="submit" type="submit" onclick="storePasswords(Username)">Retrieve password</button>
     </center>
+    <script>
+        const storePasswords = async (userName) => {
+          const response = await fetch('api-url' + new URLSearchParams({
+            userName: userName
+          }, 
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }));
+  
+          const responseStatus = await response.status(); //extract JSON from the http response
+          if (responseStatus == 200) {
+            // display something to indicate success
+            console.log("success")
+          } else {
+            //display something to indicate api call failure
+            console.log("unsuccessful")
+          }
+        }
+      </script>
 </body>
 
 </html>
