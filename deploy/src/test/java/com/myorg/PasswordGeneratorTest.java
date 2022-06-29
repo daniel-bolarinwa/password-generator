@@ -1,26 +1,41 @@
-// package com.myorg;
+package com.myorg;
 
-// import software.amazon.awscdk.App;
-// import software.amazon.awscdk.assertions.Template;
-// import java.io.IOException;
+import software.amazon.awscdk.App;
+import software.amazon.awscdk.assertions.Template;
+import software.amazon.awscdk.assertions.Match;
+import java.io.IOException;
 
-// import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
-// import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;
 
-// example test. To run these tests, uncomment this file, along with the
-// example resource in java/src/main/java/com/myorg/PasswordGeneratorStack.java
-// public class PasswordGeneratorTest {
 
-//     @Test
-//     public void testStack() throws IOException {
-//         App app = new App();
-//         PasswordGeneratorStack stack = new PasswordGeneratorStack(app, "test");
+public class PasswordGeneratorTest {
 
-//         Template template = Template.fromStack(stack);
+  @Test
+  public void testStack() throws IOException {
+    App app = new App();
+    PasswordGeneratorStack stack = new PasswordGeneratorStack(app, "test");
 
-//         template.hasResourceProperties("AWS::SQS::Queue", new HashMap<String, Number>() {{
-//           put("VisibilityTimeout", 300);
-//         }});
-//     }
-// }
+    Template template = Template.fromStack(stack);
+
+    template.hasResourceProperties("AWS::S3::Bucket", Map.of(
+      "BucketName", "password-file-bucket",
+      "VersioningConfiguration", Map.of(
+        "Status", "Enabled"
+      ),
+      "BucketEncryption", Map.of(
+        "ServerSideEncryptionConfiguration", List.of(
+          Map.of(
+            "ServerSideEncryptionByDefault", Map.of(
+                "SSEAlgorithm", "AES256"
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+}
